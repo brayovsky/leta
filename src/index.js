@@ -1,5 +1,6 @@
 require('dotenv').config();
 const express = require('express');
+const Groq = require('groq-sdk');
 
 // Create an Express app
 const app = express();
@@ -11,6 +12,14 @@ const port = process.env.PORT || 3000;
 const verifyToken = process.env.VERIFY_TOKEN;
 const whatsappToken = process.env.WA_WHATSAPP_TOKEN;
 const phoneNumberId = process.env.WA_PHONE_NUMBER_ID;
+
+const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+
+const SYSTEM_PROMPT = `You will be provided with a user's text message from WhatsApp. Use it to create a shopping list.
+Always encourage the user to add as many items in a single message.
+Always engage the user to shop if the message is not of a shopping nature.`;
+
+const histories = new Map();
 
 async function sendMessage(to, text) {
   await fetch(`https://graph.facebook.com/v22.0/${phoneNumberId}/messages`, {
@@ -64,7 +73,21 @@ app.post('/', (req, res) => {
 });
 
 async function handleMessage(to, text) {
-  await sendMessage(to, `I received ${text}`);
+  if (!histories.has(to)) histories.set(to, []);
+  const history = histories.get(to);
+
+  history.push({ role: 'user', content: text });
+
+  const completion = await groq.chat.completions.create({
+    model: 'llama-3.3-70b-versatile',
+    messages: [{ role: 'system', content: SYSTEM_PROMPT }, ...history],
+  });
+
+  const reply = completion.choices[0].message.content;
+  history.push({ role: 'assistant', content: reply });
+
+  const message = `${reply}\n\nFinish Shopping: https://leta.app/finish\nClear History: https://leta.app/clear`;
+  await sendMessage(to, message);
 }
 
 // Start the server
