@@ -79,7 +79,7 @@ async function handleMessage(to, text) {
   history.push({ role: 'user', content: text });
 
   const completion = await groq.chat.completions.create({
-    model: 'llama-3.3-70b-versatile',
+    model: 'llama-3.1-8b-instant',
     messages: [{ role: 'system', content: SYSTEM_PROMPT }, ...history],
   });
 
