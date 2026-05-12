@@ -4,6 +4,7 @@
   "workspaces": ["server", "client"],
   "scripts": {
     "start": "yarn workspace @leta/server start",
+    "dev": "yarn workspace @leta/server dev",
     "seed": "yarn workspace @leta/server seed",
     "dev:wa": "yarn workspace @leta/dev-client dev"
   }
