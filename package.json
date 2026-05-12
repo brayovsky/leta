@@ -1,18 +1,10 @@
 {
   "name": "leta",
-  "version": "1.0.0",
-  "description": "",
-  "main": "src/index.js",
+  "private": true,
+  "workspaces": ["server", "client"],
   "scripts": {
-    "start": "node src/index.js",
-    "seed": "node src/db/seed.js"
-  },
-  "author": "Brian Muthui",
-  "license": "ISC",
-  "dependencies": {
-    "dotenv": "^17.4.2",
-    "express": "^5.2.1",
-    "groq-sdk": "^1.1.2",
-    "mongoose": "^9.6.2"
+    "start": "yarn workspace @leta/server start",
+    "seed": "yarn workspace @leta/server seed",
+    "dev:wa": "yarn workspace @leta/dev-client dev"
   }
 }
