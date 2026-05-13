@@ -4,5 +4,7 @@ module.exports = {
   whatsappToken: process.env.WA_WHATSAPP_TOKEN,
   phoneNumberId: process.env.WA_PHONE_NUMBER_ID,
   baseUrl: process.env.BASE_URL,
-  groqApiKey: process.env.GROQ_API_KEY,
+  openaiApiKey: process.env.OPENAI_API_KEY,
+  usePreferences: process.env.USE_PREFERENCES !== 'false',
+  logLlm: process.env.LOG_LLM === 'true',
 };

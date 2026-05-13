@@ -1,38 +1,41 @@
-const Groq = require('groq-sdk');
-const { groqApiKey, baseUrl } = require('../config');
+const OpenAI = require('openai');
+const { Types } = require('mongoose');
+const { openaiApiKey, baseUrl, usePreferences, logLlm } = require('../config');
+const LlmLogger = require('../utils/llmLogger');
 const User = require('../db/models/User');
 const Order = require('../db/models/Order');
 const Item = require('../db/models/Item');
+const Preference = require('../db/models/Preference');
 const { sendMessage } = require('./whatsapp');
 
-const groq = new Groq({ apiKey: groqApiKey });
+const openai = new OpenAI({ apiKey: openaiApiKey });
 
-const SYSTEM_PROMPT = `You are a friendly WhatsApp shopping assistant. Keep all replies short and conversational — like a helpful friend, not a form.
+const SYSTEM_PROMPT = `You are a friendly WhatsApp shopping assistant. Your job is to understand exactly what the customer wants and build their shopping list.
 
-At the start of each message you will see the user's current order. Each line shows: name, quantity, and [id: <itemId>].
-Some messages may be the start of a new conversation and won't have an order listed.
+Keep replies short and conversational — like a helpful friend, not a form.
 
-TOOL RULES — follow these exactly:
-1. User mentions a new item → call search_items.
-2. User wants to remove, delete, or replace an item → you MUST call remove_item with the itemId from the current order. Do not skip this.
-3. User is correcting a wrong item (e.g. "not carrots, oats") → call remove_item for the wrong item, then call search_items for the correct one.
+When the customer has an active order, the top of their message will show:
 
-search_items results:
-- 1 result: add silently (no message).
-- Multiple: short clarifying question e.g. "White or brown bread?"
-- None: natural reply e.g. "Couldn't find that — try a different name?"
+Current order:
+- [id: <itemId>] Name (Brand) x<quantity>
 
-For greetings or off-topic messages reply briefly e.g. "Hey! What are we shopping for today?"
+Message: <their text>
 
-When done respond ONLY with valid JSON (no text outside it):
+Only add an item once you are certain it is what the customer wants. If a search returns multiple options, ask a short clarifying question and wait for their answer before adding anything. Keep clarifying until you can pick the right one with confidence.
+${usePreferences ? '\nWhen a customer picks a specific variant after a clarifying question, save their preference so it is automatic next time.\n' : ''}
+For greetings, ask what they would like to shop for.
+For anything unrelated to shopping, reply only: "I can only help with your shopping list."
+
+Respond ONLY with valid JSON (no text outside it):
 {
   "items": [
-    { "id": "<_id>", "name": "", "store": "", "price": 0, "variant": { "brand": "", "size": "", "unit": "" }, "quantity": 1 }
+    { "id": "507f1f77bcf86cd799439011", "name": "", "store": "", "price": 0, "variant": { "brand": "", "size": "", "unit": "" }, "quantity": 1 }
   ],
   "message": ""
 }
 
-Leave message as "" when items were found without ambiguity.`;
+CRITICAL: The "id" field must ALWAYS be copied verbatim from a search_items result. Never invent or guess an id.
+Leave message as "" when items were added without ambiguity.`;
 
 const TOOLS = [
   {
@@ -53,7 +56,7 @@ const TOOLS = [
     type: 'function',
     function: {
       name: 'remove_item',
-      description: 'Remove an item from the current order by its id.',
+      description: 'Remove an item from the current order.',
       parameters: {
         type: 'object',
         properties: {
@@ -63,39 +66,119 @@ const TOOLS = [
       },
     },
   },
+  {
+    type: 'function',
+    function: {
+      name: 'update_item',
+      description: 'Update the quantity of an existing item in the order.',
+      parameters: {
+        type: 'object',
+        properties: {
+          itemId:   { type: 'string',  description: 'The id of the item to update' },
+          quantity: { type: 'number',  description: 'The new quantity' },
+        },
+        required: ['itemId', 'quantity'],
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'replace_item',
+      description: 'Remove a wrong item and search for the correct one in a single call.',
+      parameters: {
+        type: 'object',
+        properties: {
+          itemId: { type: 'string', description: 'The id of the item to remove' },
+          query:  { type: 'string', description: 'Search query for the replacement item' },
+        },
+        required: ['itemId', 'query'],
+      },
+    },
+  },
+  ...(usePreferences ? [{
+    type: 'function',
+    function: {
+      name: 'save_preference',
+      description: 'Save the user\'s preferred variant for a generic item name (e.g. "bread" → specific item id).',
+      parameters: {
+        type: 'object',
+        properties: {
+          itemName: { type: 'string', description: 'The generic item name (e.g. "bread", "milk")' },
+          itemId:   { type: 'string', description: 'The _id of the chosen item' },
+        },
+        required: ['itemName', 'itemId'],
+      },
+    },
+  }] : []),
 ];
 
-async function searchItems(query) {
-  // Primary: MongoDB text index (tokenised, no substring matches)
+function filterByTokens(items, query) {
+  const tokens = query.toLowerCase().split(/\s+/).filter(t => t.length > 1);
+  if (tokens.length <= 1) return items;
+
+  const scored = items.map(item => {
+    const haystack = [
+      item.name,
+      item.store,
+      item.variant?.brand,
+      item.variant?.size,
+      item.variant?.unit,
+      ...(item.tags ?? []),
+    ].filter(Boolean).join(' ').toLowerCase();
+
+    const matchCount = tokens.filter(t => haystack.includes(t)).length;
+    return { item, matchCount };
+  });
+
+  const maxMatches = Math.max(...scored.map(s => s.matchCount));
+  return scored.filter(s => s.matchCount === maxMatches).map(s => s.item);
+}
+
+async function searchItems(query, userId) {
+  if (usePreferences && userId) {
+    const pref = await Preference.findOne({ user: userId, itemName: query.toLowerCase() }).populate('item').lean();
+    if (pref?.item) return [pref.item];
+  }
+
+  // Primary: MongoDB text index across name, brand, store, size, unit, tags
   const textResults = await Item.find(
     { $text: { $search: query } },
     { score: { $meta: 'textScore' } }
-  ).sort({ score: { $meta: 'textScore' } }).limit(5).lean();
+  ).sort({ score: { $meta: 'textScore' } }).limit(10).lean();
 
-  if (textResults.length) return textResults;
+  if (textResults.length) return filterByTokens(textResults, query);
 
-  // Fallback: whole-word regex so "ots" won't match "carrots"
-  const re = new RegExp(`\\b${query}\\b`, 'i');
-  return Item.find({
-    $or: [
+  // Fallback: per-token word-boundary regex across all fields
+  const tokens = query.split(/\s+/).filter(Boolean);
+  const conditions = tokens.flatMap(token => {
+    const re = new RegExp(`\\b${token}\\b`, 'i');
+    return [
       { name: re },
       { 'variant.brand': re },
-      { tags: { $in: [re] } },
-    ],
-  }).limit(5).lean();
+      { 'variant.size': re },
+      { 'variant.unit': re },
+      { store: re },
+      { tags: re },
+    ];
+  });
+  const fallback = await Item.find({ $or: conditions }).limit(10).lean();
+  return filterByTokens(fallback, query);
 }
 
-async function runAgentLoop(messages) {
+async function runAgentLoop(messages, userId, logger) {
   const removedIds = [];
+  const updatedItems = [];
+  const savedPreferences = [];
 
   for (let i = 0; i < 10; i++) {
-    const completion = await groq.chat.completions.create({
-      model: 'llama-3.3-70b-versatile',
+    const sentMessages = logger ? [...messages] : null;
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-5-nano',
       messages,
       tools: TOOLS,
-      tool_choice: 'auto'
+      tool_choice: 'auto',
     });
-    console.log('LLM response:', JSON.stringify(completion, null, 2));
     const choice = completion.choices[0];
 
     if (choice.finish_reason === 'tool_calls') {
@@ -104,24 +187,42 @@ async function runAgentLoop(messages) {
         content: choice.message.content ?? null,
         tool_calls: choice.message.tool_calls,
       });
+      const callLog = [];
       for (const call of choice.message.tool_calls) {
+        const args = JSON.parse(call.function.arguments);
         let result;
-        if (call.function.name === 'search_items') {
-          const { query } = JSON.parse(call.function.arguments);
-          result = await searchItems(query);
-        } else if (call.function.name === 'remove_item') {
-          const { itemId } = JSON.parse(call.function.arguments);
-          removedIds.push(itemId);
-          result = { removed: itemId };
+        switch (call.function.name) {
+          case 'search_items':
+            result = await searchItems(args.query, userId);
+            break;
+          case 'remove_item':
+            removedIds.push(args.itemId);
+            result = { removed: args.itemId };
+            break;
+          case 'update_item':
+            updatedItems.push({ itemId: args.itemId, quantity: args.quantity });
+            result = { updated: args.itemId, quantity: args.quantity };
+            break;
+          case 'replace_item':
+            removedIds.push(args.itemId);
+            result = await searchItems(args.query, userId);
+            break;
+          case 'save_preference':
+            if (usePreferences) savedPreferences.push({ itemName: args.itemName.toLowerCase(), itemId: args.itemId });
+            result = { saved: true };
+            break;
         }
+        callLog.push({ name: call.function.name, args, result });
         messages.push({ role: 'tool', tool_call_id: call.id, content: JSON.stringify(result) });
       }
+      logger?.iteration(i + 1, sentMessages, choice, callLog);
     } else {
+      logger?.iteration(i + 1, sentMessages, choice, []);
       messages.push({ role: 'assistant', content: choice.message.content });
       try {
-        return { ...JSON.parse(choice.message.content), removedIds };
+        return { ...JSON.parse(choice.message.content), removedIds, updatedItems, savedPreferences };
       } catch {
-        return { items: [], message: choice.message.content, removedIds };
+        return { items: [], message: choice.message.content, removedIds, updatedItems, savedPreferences };
       }
     }
   }
@@ -173,13 +274,22 @@ async function processMessage(to, phoneNumber, text) {
     { role: 'user', content: userContent },
   ];
 
-  const { items: resolvedItems, removedIds, message: reply } = await runAgentLoop(messages);
+  const logger = logLlm ? new LlmLogger(to) : null;
+  logger?.userMessage(text);
+
+  const { items: resolvedItems, removedIds, updatedItems, savedPreferences, message: reply } = await runAgentLoop(messages, user._id, logger);
 
   if (removedIds?.length) {
     order.items = order.items.filter(i => !removedIds.includes(i.item.toString()));
   }
 
-  for (const resolved of resolvedItems ?? []) {
+  for (const { itemId, quantity } of updatedItems ?? []) {
+    const existing = order.items.find(i => i.item.toString() === itemId);
+    if (existing) existing.quantity = quantity;
+  }
+
+  for (const resolved of (reply ? [] : resolvedItems ?? [])) {
+    if (!Types.ObjectId.isValid(resolved.id)) continue;
     const existing = order.items.find(i => i.item.toString() === resolved.id);
     if (existing) {
       existing.quantity = resolved.quantity ?? 1;
@@ -188,9 +298,19 @@ async function processMessage(to, phoneNumber, text) {
     }
   }
 
+  if (usePreferences) {
+    for (const { itemName, itemId } of savedPreferences ?? []) {
+      await Preference.findOneAndUpdate(
+        { user: user._id, itemName },
+        { item: itemId },
+        { upsert: true }
+      );
+    }
+  }
+
   // Store only the bare user text in history (not the injected order context)
   order.history.push({ role: 'user', content: text });
-  order.history.push({ role: 'assistant', content: JSON.stringify({ items: resolvedItems, removedIds, message: reply }) });
+  order.history.push({ role: 'assistant', content: JSON.stringify({ items: resolvedItems, removedIds, updatedItems, message: reply }) });
   await order.save();
 
   const refreshed = await Order.findById(order._id).populate('items.item');
@@ -198,7 +318,10 @@ async function processMessage(to, phoneNumber, text) {
   const clearUrl = `${baseUrl}/clear/${order._id}`;
   const links = `Finish Shopping: https://leta.app/finish\nClear Order: ${clearUrl}`;
 
-  return [orderText, reply, links].filter(Boolean).join('\n\n');
+  const outText = [orderText, reply, links].filter(Boolean).join('\n\n');
+  logger?.finalReply(reply || '(silent)');
+  logger?.flush();
+  return outText;
 }
 
 async function handleMessage(to, phoneNumber, text) {
