@@ -8,6 +8,7 @@ const orderSchema = new Schema({
     quantity: { type: Number, default: 1 },
   }],
   history: [{ role: String, content: String }],
+  clearToken: { type: String, default: null },
 }, { timestamps: true });
 
 module.exports = model('Order', orderSchema);

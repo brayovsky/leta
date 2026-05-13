@@ -1,11 +1,12 @@
 {
   "name": "leta",
   "private": true,
-  "workspaces": ["server", "dev-client"],
+  "workspaces": ["server", "dev-client", "portal"],
   "scripts": {
     "start": "yarn workspace @leta/server start",
     "dev": "yarn workspace @leta/server dev",
     "seed": "yarn workspace @leta/server seed",
-    "dev:wa": "yarn workspace @leta/dev-client dev"
+    "dev:wa": "yarn workspace @leta/dev-client dev",
+    "dev:portal": "yarn workspace @leta/portal dev"
   }
 }

@@ -1,3 +1,4 @@
+const crypto = require('crypto');
 const OpenAI = require('openai');
 const { Types } = require('mongoose');
 const { openaiApiKey, baseUrl, usePreferences, logLlm } = require('../config');
@@ -311,11 +312,12 @@ async function processMessage(to, phoneNumber, text) {
   // Store only the bare user text in history (not the injected order context)
   order.history.push({ role: 'user', content: text });
   order.history.push({ role: 'assistant', content: JSON.stringify({ items: resolvedItems, removedIds, updatedItems, message: reply }) });
+  order.clearToken = crypto.randomBytes(24).toString('hex');
   await order.save();
 
   const refreshed = await Order.findById(order._id).populate('items.item');
   const orderText = formatOrder(refreshed.items.filter(i => i.item));
-  const clearUrl = `${baseUrl}/clear/${order._id}`;
+  const clearUrl = `${baseUrl}/clear/${order._id}?t=${order.clearToken}`;
   const links = `Finish Shopping: https://leta.app/finish\nClear Order: ${clearUrl}`;
 
   const outText = [orderText, reply, links].filter(Boolean).join('\n\n');
