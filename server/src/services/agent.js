@@ -8,6 +8,7 @@ const Order = require('../db/models/Order');
 const Item = require('../db/models/Item');
 const Preference = require('../db/models/Preference');
 const { sendMessage } = require('./whatsapp');
+const { findStoresNear, buildLocationPrompt, addToUserLocations } = require('./location');
 
 const openai = new OpenAI({ apiKey: openaiApiKey });
 
@@ -43,7 +44,7 @@ const TOOLS = [
     type: 'function',
     function: {
       name: 'search_items',
-      description: 'Search the product catalog for items by name, brand, size, or tags.',
+      description: 'Search the product catalog for items by name, brand, size, or tags. Only returns items available in the stores serving the customer.',
       parameters: {
         type: 'object',
         properties: {
@@ -121,7 +122,7 @@ function filterByTokens(items, query) {
   const scored = items.map(item => {
     const haystack = [
       item.name,
-      item.store,
+      item.store?.name,
       item.variant?.brand,
       item.variant?.size,
       item.variant?.unit,
@@ -136,21 +137,27 @@ function filterByTokens(items, query) {
   return scored.filter(s => s.matchCount === maxMatches).map(s => s.item);
 }
 
-async function searchItems(query, userId) {
+async function searchItems(query, userId, storeIds) {
+  const storeFilter = { store: { $in: storeIds } };
+
   if (usePreferences && userId) {
-    const pref = await Preference.findOne({ user: userId, itemName: query.toLowerCase() }).populate('item').lean();
-    if (pref?.item) return [pref.item];
+    const pref = await Preference.findOne({ user: userId, itemName: query.toLowerCase() })
+      .populate({ path: 'item', populate: { path: 'store' } })
+      .lean();
+    if (pref?.item && storeIds.some(id => id.equals(pref.item.store?._id ?? pref.item.store))) {
+      return [pref.item];
+    }
   }
 
-  // Primary: MongoDB text index across name, brand, store, size, unit, tags
+  // Primary: MongoDB text index (scoped to serving stores)
   const textResults = await Item.find(
-    { $text: { $search: query } },
+    { ...storeFilter, $text: { $search: query } },
     { score: { $meta: 'textScore' } }
-  ).sort({ score: { $meta: 'textScore' } }).limit(10).lean();
+  ).sort({ score: { $meta: 'textScore' } }).limit(10).populate('store').lean();
 
   if (textResults.length) return filterByTokens(textResults, query);
 
-  // Fallback: per-token word-boundary regex across all fields
+  // Fallback: per-token word-boundary regex
   const tokens = query.split(/\s+/).filter(Boolean);
   const conditions = tokens.flatMap(token => {
     const re = new RegExp(`\\b${token}\\b`, 'i');
@@ -159,15 +166,15 @@ async function searchItems(query, userId) {
       { 'variant.brand': re },
       { 'variant.size': re },
       { 'variant.unit': re },
-      { store: re },
       { tags: re },
     ];
   });
-  const fallback = await Item.find({ $or: conditions }).limit(10).lean();
+  const fallback = await Item.find({ ...storeFilter, $or: conditions })
+    .limit(10).populate('store').lean();
   return filterByTokens(fallback, query);
 }
 
-async function runAgentLoop(messages, userId, logger) {
+async function runAgentLoop(messages, userId, storeIds, logger) {
   const removedIds = [];
   const updatedItems = [];
   const savedPreferences = [];
@@ -194,7 +201,7 @@ async function runAgentLoop(messages, userId, logger) {
         let result;
         switch (call.function.name) {
           case 'search_items':
-            result = await searchItems(args.query, userId);
+            result = await searchItems(args.query, userId, storeIds);
             break;
           case 'remove_item':
             removedIds.push(args.itemId);
@@ -206,7 +213,7 @@ async function runAgentLoop(messages, userId, logger) {
             break;
           case 'replace_item':
             removedIds.push(args.itemId);
-            result = await searchItems(args.query, userId);
+            result = await searchItems(args.query, userId, storeIds);
             break;
           case 'save_preference':
             if (usePreferences) savedPreferences.push({ itemName: args.itemName.toLowerCase(), itemId: args.itemId });
@@ -237,7 +244,7 @@ function formatOrder(orderItems) {
   const lines = orderItems.map(({ item, quantity }) => {
     const variantParts = [item.variant?.brand, item.variant?.size, item.variant?.unit].filter(Boolean);
     const variant = variantParts.length ? ` (${variantParts.join(', ')})` : '';
-    const store = item.store ? ` @ ${item.store}` : '';
+    const store = item.store?.name ? ` @ ${item.store.name}` : '';
     const lineTotal = (item.price ?? 0) * quantity;
     total += lineTotal;
     const priceStr = item.price != null
@@ -249,7 +256,46 @@ function formatOrder(orderItems) {
   return `Your order:\n${lines.join('\n')}\n\nTotal: KES ${total}`;
 }
 
-async function processMessage(to, phoneNumber, text) {
+async function applyLocation(user, order, name, coordinates) {
+  const stores = await findStoresNear(coordinates[0], coordinates[1]);
+  if (!stores.length) return null;
+
+  order.location = { name, coordinates };
+  order.stores = stores.map(s => s._id);
+  addToUserLocations(user, name, coordinates);
+  await order.save();
+  await user.save();
+
+  const storeList = stores.map(s => s.name).join(', ');
+  return `Delivery set to ${name}. We'll order from: ${storeList}. What would you like to shop for?`;
+}
+
+async function handleLocationGate(user, order, message) {
+  if (message.type === 'location') {
+    const { latitude, longitude, name, address } = message.location;
+    if (typeof latitude !== 'number' || typeof longitude !== 'number') {
+      return 'Could not read that location. Please try sharing it again.';
+    }
+    const label = name || address || 'Shared location';
+    const reply = await applyLocation(user, order, label, [longitude, latitude]);
+    return reply || 'Sorry, that location is not in our service area yet. Please share a location near a partner store.';
+  }
+
+  // Text message during location gate: maybe a saved-location selection
+  const trimmed = (message.text || '').trim();
+  if (user.locations?.length && /^\d+$/.test(trimmed)) {
+    const idx = parseInt(trimmed, 10) - 1;
+    if (idx >= 0 && idx < user.locations.length) {
+      const chosen = user.locations[idx];
+      const reply = await applyLocation(user, order, chosen.name, chosen.coordinates);
+      return reply || `${chosen.name} is no longer in our service area. Please share a new location.`;
+    }
+  }
+
+  return buildLocationPrompt(user);
+}
+
+async function processMessage(to, phoneNumber, message) {
   const user = await User.findOneAndUpdate(
     { waId: to },
     { waId: to, ...(phoneNumber && { phoneNumber }) },
@@ -258,6 +304,16 @@ async function processMessage(to, phoneNumber, text) {
 
   let order = await Order.findOne({ user: user._id, status: 'active' });
   if (!order) order = await Order.create({ user: user._id });
+
+  if (!order.location?.coordinates?.length) {
+    return handleLocationGate(user, order, message);
+  }
+
+  if (message.type === 'location') {
+    return `Delivery for this order is already set to ${order.location.name}. To use a different location, clear the order and start a new one.`;
+  }
+
+  const text = message.text;
 
   // Populate current order so the LLM can reference item ids for removal
   const populated = await Order.findById(order._id).populate('items.item');
@@ -278,7 +334,8 @@ async function processMessage(to, phoneNumber, text) {
   const logger = logLlm ? new LlmLogger(to) : null;
   logger?.userMessage(text);
 
-  const { items: resolvedItems, removedIds, updatedItems, savedPreferences, message: reply } = await runAgentLoop(messages, user._id, logger);
+  const { items: resolvedItems, removedIds, updatedItems, savedPreferences, message: reply } =
+    await runAgentLoop(messages, user._id, order.stores, logger);
 
   if (removedIds?.length) {
     order.items = order.items.filter(i => !removedIds.includes(i.item.toString()));
@@ -315,7 +372,8 @@ async function processMessage(to, phoneNumber, text) {
   order.clearToken = crypto.randomBytes(24).toString('hex');
   await order.save();
 
-  const refreshed = await Order.findById(order._id).populate('items.item');
+  const refreshed = await Order.findById(order._id)
+    .populate({ path: 'items.item', populate: { path: 'store' } });
   const orderText = formatOrder(refreshed.items.filter(i => i.item));
   const clearUrl = `${baseUrl}/clear/${order._id}?t=${order.clearToken}`;
   const links = `Finish Shopping: https://leta.app/finish\nClear Order: ${clearUrl}`;
@@ -326,8 +384,8 @@ async function processMessage(to, phoneNumber, text) {
   return outText;
 }
 
-async function handleMessage(to, phoneNumber, text) {
-  const reply = await processMessage(to, phoneNumber, text);
+async function handleMessage(to, phoneNumber, message) {
+  const reply = await processMessage(to, phoneNumber, message);
   await sendMessage(to, reply);
 }
 

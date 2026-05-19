@@ -475,4 +475,133 @@ module.exports = [
     variant: { brand: 'Vaseline', size: '400ml', unit: 'bottle' },
     tags: ['toiletries', 'skin', 'hygiene'],
   },
+
+  // ===== Chandarana Foodplus (Signature Mall) =====
+  // Dairy
+  { name: 'Milk', store: 'Chandarana', price: 70, variant: { brand: 'Brookside', size: '500ml', unit: 'bottle' }, tags: ['dairy', 'drink', 'breakfast'] },
+  { name: 'Milk', store: 'Chandarana', price: 130, variant: { brand: 'Brookside', size: '1L', unit: 'bottle' }, tags: ['dairy', 'drink', 'breakfast'] },
+  { name: 'Milk', store: 'Chandarana', price: 135, variant: { brand: 'Daima', size: '1L', unit: 'packet' }, tags: ['dairy', 'drink', 'breakfast'] },
+  { name: 'Greek Yoghurt', store: 'Chandarana', price: 220, variant: { brand: 'Daima', size: '500g', unit: 'tub' }, tags: ['dairy', 'yoghurt', 'snack', 'healthy'] },
+  { name: 'Yoghurt', store: 'Chandarana', price: 95, variant: { brand: 'Brookside', size: '500ml', unit: 'cup' }, tags: ['dairy', 'yoghurt', 'snack'] },
+  { name: 'Cheese', store: 'Chandarana', price: 580, variant: { brand: 'President', size: '250g', unit: 'block' }, tags: ['dairy', 'cheese', 'imported'] },
+  { name: 'Mozzarella', store: 'Chandarana', price: 520, variant: { brand: 'Galbani', size: '200g', unit: 'pack' }, tags: ['dairy', 'cheese', 'imported', 'italian'] },
+  { name: 'Butter', store: 'Chandarana', price: 240, variant: { brand: 'Anchor', size: '250g', unit: 'block' }, tags: ['dairy', 'fat', 'baking', 'spread'] },
+  { name: 'Cream', store: 'Chandarana', price: 280, variant: { brand: 'Brookside', size: '500ml', unit: 'carton' }, tags: ['dairy', 'cream', 'baking'] },
+
+  // Bakery
+  { name: 'White Bread', store: 'Chandarana', price: 70, variant: { brand: 'Festive', size: '400g', unit: 'loaf' }, tags: ['bread', 'bakery', 'breakfast'] },
+  { name: 'Brown Bread', store: 'Chandarana', price: 75, variant: { brand: 'Lyca', size: '400g', unit: 'loaf' }, tags: ['bread', 'bakery', 'breakfast', 'healthy'] },
+  { name: 'Croissants', store: 'Chandarana', price: 280, variant: { brand: 'In-store Bakery', size: '4 pack', unit: 'pack' }, tags: ['bakery', 'breakfast', 'pastry'] },
+  { name: 'Baguette', store: 'Chandarana', price: 180, variant: { brand: 'In-store Bakery', size: '1 piece', unit: 'loaf' }, tags: ['bread', 'bakery', 'french'] },
+
+  // Eggs & Protein
+  { name: 'Eggs', store: 'Chandarana', price: 510, variant: { brand: 'Kenchic', size: '30 pack', unit: 'tray' }, tags: ['protein', 'breakfast', 'baking'] },
+  { name: 'Eggs', store: 'Chandarana', price: 580, variant: { brand: 'Free Range', size: '30 pack', unit: 'tray' }, tags: ['protein', 'breakfast', 'baking', 'healthy'] },
+  { name: 'Chicken', store: 'Chandarana', price: 720, variant: { brand: 'Kenchic', size: '1kg', unit: 'pack' }, tags: ['meat', 'protein', 'poultry'] },
+  { name: 'Beef Mince', store: 'Chandarana', price: 800, variant: { brand: 'Fresh', size: '1kg', unit: 'pack' }, tags: ['meat', 'protein', 'beef'] },
+  { name: 'Bacon', store: 'Chandarana', price: 380, variant: { brand: 'Farmer\'s Choice', size: '250g', unit: 'pack' }, tags: ['meat', 'protein', 'pork', 'breakfast'] },
+  { name: 'Sausages', store: 'Chandarana', price: 320, variant: { brand: 'Farmer\'s Choice', size: '500g', unit: 'pack' }, tags: ['meat', 'protein', 'breakfast'] },
+  { name: 'Smoked Salmon', store: 'Chandarana', price: 1250, variant: { brand: 'Imported', size: '200g', unit: 'pack' }, tags: ['fish', 'protein', 'imported', 'premium'] },
+
+  // Oils & Pantry
+  { name: 'Cooking Oil', store: 'Chandarana', price: 240, variant: { brand: 'Elianto', size: '1L', unit: 'bottle' }, tags: ['oil', 'cooking', 'fats'] },
+  { name: 'Olive Oil', store: 'Chandarana', price: 1050, variant: { brand: 'Borges Extra Virgin', size: '500ml', unit: 'bottle' }, tags: ['oil', 'cooking', 'imported', 'healthy'] },
+  { name: 'Coconut Oil', store: 'Chandarana', price: 580, variant: { brand: 'KTDA', size: '500ml', unit: 'jar' }, tags: ['oil', 'cooking', 'healthy'] },
+
+  // Grains & Staples
+  { name: 'Maize Flour', store: 'Chandarana', price: 160, variant: { brand: 'Jogoo', size: '2kg', unit: 'pack' }, tags: ['flour', 'ugali', 'staple', 'grains'] },
+  { name: 'Wheat Flour', store: 'Chandarana', price: 195, variant: { brand: 'Exe', size: '2kg', unit: 'pack' }, tags: ['flour', 'baking', 'chapati', 'grains'] },
+  { name: 'Rice', store: 'Chandarana', price: 380, variant: { brand: 'Basmati', size: '2kg', unit: 'pack' }, tags: ['grains', 'staple', 'rice'] },
+  { name: 'Pasta', store: 'Chandarana', price: 165, variant: { brand: 'Barilla', size: '500g', unit: 'pack' }, tags: ['grains', 'pasta', 'italian'] },
+  { name: 'Spaghetti', store: 'Chandarana', price: 175, variant: { brand: 'Barilla', size: '500g', unit: 'pack' }, tags: ['grains', 'pasta', 'italian'] },
+  { name: 'Quinoa', store: 'Chandarana', price: 680, variant: { brand: 'Imported', size: '500g', unit: 'pack' }, tags: ['grains', 'healthy', 'imported'] },
+
+  // Sugar, Tea, Coffee
+  { name: 'Sugar', store: 'Chandarana', price: 165, variant: { brand: 'Mumias', size: '1kg', unit: 'pack' }, tags: ['sugar', 'sweetener'] },
+  { name: 'Tea Bags', store: 'Chandarana', price: 165, variant: { brand: 'Lipton', size: '100 bags', unit: 'box' }, tags: ['tea', 'drink', 'breakfast'] },
+  { name: 'Tea Leaves', store: 'Chandarana', price: 150, variant: { brand: 'Kericho Gold', size: '250g', unit: 'pack' }, tags: ['tea', 'drink', 'breakfast'] },
+  { name: 'Instant Coffee', store: 'Chandarana', price: 880, variant: { brand: 'Nescafé Gold', size: '200g', unit: 'jar' }, tags: ['coffee', 'drink', 'breakfast'] },
+  { name: 'Coffee Beans', store: 'Chandarana', price: 950, variant: { brand: 'Lavazza', size: '250g', unit: 'pack' }, tags: ['coffee', 'drink', 'imported'] },
+
+  // Condiments & Sauces
+  { name: 'Tomato Sauce', store: 'Chandarana', price: 110, variant: { brand: 'Heinz', size: '570g', unit: 'bottle' }, tags: ['condiment', 'sauce', 'cooking'] },
+  { name: 'Mayonnaise', store: 'Chandarana', price: 320, variant: { brand: 'Hellmann\'s', size: '450g', unit: 'jar' }, tags: ['condiment', 'sauce'] },
+  { name: 'Soy Sauce', store: 'Chandarana', price: 195, variant: { brand: 'Kikkoman', size: '150ml', unit: 'bottle' }, tags: ['condiment', 'sauce', 'asian'] },
+  { name: 'Olives', store: 'Chandarana', price: 450, variant: { brand: 'Crespo', size: '320g', unit: 'jar' }, tags: ['condiment', 'imported', 'mediterranean'] },
+  { name: 'Peanut Butter', store: 'Chandarana', price: 380, variant: { brand: 'Skippy', size: '462g', unit: 'jar' }, tags: ['spread', 'snack', 'protein', 'imported'] },
+  { name: 'Nutella', store: 'Chandarana', price: 680, variant: { brand: 'Nutella', size: '350g', unit: 'jar' }, tags: ['spread', 'snack', 'chocolate', 'imported'] },
+
+  // Cereal & Breakfast
+  { name: 'Cornflakes', store: 'Chandarana', price: 420, variant: { brand: 'Kellogg\'s', size: '500g', unit: 'box' }, tags: ['cereal', 'breakfast'] },
+  { name: 'Granola', store: 'Chandarana', price: 580, variant: { brand: 'Quaker', size: '500g', unit: 'pack' }, tags: ['cereal', 'breakfast', 'healthy'] },
+  { name: 'Muesli', store: 'Chandarana', price: 620, variant: { brand: 'Jordans', size: '500g', unit: 'pack' }, tags: ['cereal', 'breakfast', 'healthy', 'imported'] },
+
+  // Snacks
+  { name: 'Chocolate Bar', store: 'Chandarana', price: 580, variant: { brand: 'Lindt', size: '100g', unit: 'bar' }, tags: ['snack', 'chocolate', 'imported', 'premium'] },
+  { name: 'Biscuits', store: 'Chandarana', price: 165, variant: { brand: 'Oreo', size: '154g', unit: 'pack' }, tags: ['snack', 'biscuit', 'sweet'] },
+  { name: 'Crisps', store: 'Chandarana', price: 320, variant: { brand: 'Pringles', size: '165g', unit: 'tin' }, tags: ['snack', 'crisps', 'chips'] },
+  { name: 'Nuts', store: 'Chandarana', price: 480, variant: { brand: 'Out of Africa Cashews', size: '250g', unit: 'pack' }, tags: ['snack', 'nuts', 'protein', 'healthy'] },
+
+  // Drinks
+  { name: 'Sparkling Water', store: 'Chandarana', price: 420, variant: { brand: 'Perrier', size: '750ml', unit: 'bottle' }, tags: ['drink', 'water', 'imported'] },
+  { name: 'Juice', store: 'Chandarana', price: 260, variant: { brand: 'Del Monte', size: '1L', unit: 'carton' }, tags: ['drink', 'juice', 'fruit'] },
+  { name: 'Wine', store: 'Chandarana', price: 1850, variant: { brand: 'Imported Red', size: '750ml', unit: 'bottle' }, tags: ['drink', 'alcohol', 'wine', 'imported'] },
+
+  // Household
+  { name: 'Toilet Paper', store: 'Chandarana', price: 340, variant: { brand: 'Hakika', size: '10 rolls', unit: 'pack' }, tags: ['toiletries', 'household', 'bathroom'] },
+  { name: 'Laundry Detergent', store: 'Chandarana', price: 1250, variant: { brand: 'Persil', size: '2kg', unit: 'pack' }, tags: ['cleaning', 'laundry', 'household'] },
+  { name: 'Dish Soap', store: 'Chandarana', price: 380, variant: { brand: 'Fairy', size: '500ml', unit: 'bottle' }, tags: ['cleaning', 'kitchen', 'imported'] },
+  { name: 'Shampoo', store: 'Chandarana', price: 580, variant: { brand: 'Pantene', size: '400ml', unit: 'bottle' }, tags: ['toiletries', 'hair', 'hygiene'] },
+
+  // ===== Go Fruits (Signature Mall) =====
+  // Fruits
+  { name: 'Mango', store: 'Go Fruits', price: 250, variant: { brand: 'Fresh', size: '1kg', unit: 'pack' }, tags: ['fruit', 'fresh produce', 'tropical'] },
+  { name: 'Pineapple', store: 'Go Fruits', price: 180, variant: { brand: 'Fresh', size: '1 piece', unit: 'piece' }, tags: ['fruit', 'fresh produce', 'tropical'] },
+  { name: 'Watermelon', store: 'Go Fruits', price: 250, variant: { brand: 'Fresh', size: '1 piece', unit: 'piece' }, tags: ['fruit', 'fresh produce', 'hydrating'] },
+  { name: 'Papaya', store: 'Go Fruits', price: 200, variant: { brand: 'Fresh', size: '1 piece', unit: 'piece' }, tags: ['fruit', 'fresh produce', 'tropical', 'breakfast'] },
+  { name: 'Oranges', store: 'Go Fruits', price: 180, variant: { brand: 'Fresh', size: '1kg', unit: 'pack' }, tags: ['fruit', 'fresh produce', 'citrus'] },
+  { name: 'Apples', store: 'Go Fruits', price: 380, variant: { brand: 'Imported', size: '1kg', unit: 'pack' }, tags: ['fruit', 'fresh produce', 'imported'] },
+  { name: 'Grapes', store: 'Go Fruits', price: 320, variant: { brand: 'Imported', size: '500g', unit: 'pack' }, tags: ['fruit', 'fresh produce', 'imported', 'snack'] },
+  { name: 'Strawberries', store: 'Go Fruits', price: 280, variant: { brand: 'Fresh', size: '250g', unit: 'punnet' }, tags: ['fruit', 'fresh produce', 'berries'] },
+  { name: 'Blueberries', store: 'Go Fruits', price: 450, variant: { brand: 'Imported', size: '125g', unit: 'punnet' }, tags: ['fruit', 'fresh produce', 'berries', 'imported'] },
+  { name: 'Passion Fruit', store: 'Go Fruits', price: 220, variant: { brand: 'Fresh', size: '500g', unit: 'pack' }, tags: ['fruit', 'fresh produce', 'tropical'] },
+  { name: 'Avocado', store: 'Go Fruits', price: 280, variant: { brand: 'Fresh Hass', size: '1kg', unit: 'pack' }, tags: ['fruit', 'fresh produce', 'healthy'] },
+  { name: 'Bananas', store: 'Go Fruits', price: 130, variant: { brand: 'Fresh', size: '1kg', unit: 'bunch' }, tags: ['fruit', 'fresh produce', 'snack'] },
+  { name: 'Lemons', store: 'Go Fruits', price: 150, variant: { brand: 'Fresh', size: '500g', unit: 'pack' }, tags: ['fruit', 'fresh produce', 'citrus', 'cooking'] },
+  { name: 'Limes', store: 'Go Fruits', price: 180, variant: { brand: 'Fresh', size: '500g', unit: 'pack' }, tags: ['fruit', 'fresh produce', 'citrus', 'cooking'] },
+  { name: 'Plums', store: 'Go Fruits', price: 250, variant: { brand: 'Fresh', size: '500g', unit: 'pack' }, tags: ['fruit', 'fresh produce', 'stone fruit'] },
+  { name: 'Pomegranate', store: 'Go Fruits', price: 320, variant: { brand: 'Imported', size: '1 piece', unit: 'piece' }, tags: ['fruit', 'fresh produce', 'imported', 'healthy'] },
+  { name: 'Pears', store: 'Go Fruits', price: 350, variant: { brand: 'Imported', size: '1kg', unit: 'pack' }, tags: ['fruit', 'fresh produce', 'imported'] },
+
+  // Vegetables
+  { name: 'Tomatoes', store: 'Go Fruits', price: 120, variant: { brand: 'Fresh', size: '1kg', unit: 'pack' }, tags: ['vegetables', 'fresh produce', 'cooking'] },
+  { name: 'Onions', store: 'Go Fruits', price: 130, variant: { brand: 'Fresh Red', size: '1kg', unit: 'pack' }, tags: ['vegetables', 'fresh produce', 'cooking'] },
+  { name: 'Potatoes', store: 'Go Fruits', price: 220, variant: { brand: 'Fresh', size: '2kg', unit: 'pack' }, tags: ['vegetables', 'fresh produce', 'staple'] },
+  { name: 'Sweet Potatoes', store: 'Go Fruits', price: 180, variant: { brand: 'Fresh', size: '1kg', unit: 'pack' }, tags: ['vegetables', 'fresh produce', 'healthy'] },
+  { name: 'Carrots', store: 'Go Fruits', price: 120, variant: { brand: 'Fresh', size: '1kg', unit: 'pack' }, tags: ['vegetables', 'fresh produce', 'cooking'] },
+  { name: 'Cucumber', store: 'Go Fruits', price: 90, variant: { brand: 'Fresh', size: '500g', unit: 'pack' }, tags: ['vegetables', 'fresh produce', 'salad'] },
+  { name: 'Capsicum', store: 'Go Fruits', price: 150, variant: { brand: 'Fresh Green', size: '500g', unit: 'pack' }, tags: ['vegetables', 'fresh produce', 'cooking'] },
+  { name: 'Capsicum', store: 'Go Fruits', price: 280, variant: { brand: 'Fresh Red & Yellow', size: '500g', unit: 'pack' }, tags: ['vegetables', 'fresh produce', 'cooking', 'colourful'] },
+  { name: 'Spinach', store: 'Go Fruits', price: 50, variant: { brand: 'Fresh', size: '1 bunch', unit: 'bunch' }, tags: ['vegetables', 'fresh produce', 'greens', 'healthy'] },
+  { name: 'Kale (Sukuma Wiki)', store: 'Go Fruits', price: 40, variant: { brand: 'Fresh', size: '1 bunch', unit: 'bunch' }, tags: ['vegetables', 'fresh produce', 'greens', 'sukuma'] },
+  { name: 'Lettuce', store: 'Go Fruits', price: 120, variant: { brand: 'Fresh Iceberg', size: '1 head', unit: 'head' }, tags: ['vegetables', 'fresh produce', 'salad'] },
+  { name: 'Broccoli', store: 'Go Fruits', price: 280, variant: { brand: 'Fresh', size: '500g', unit: 'pack' }, tags: ['vegetables', 'fresh produce', 'healthy', 'greens'] },
+  { name: 'Cauliflower', store: 'Go Fruits', price: 220, variant: { brand: 'Fresh', size: '1 head', unit: 'head' }, tags: ['vegetables', 'fresh produce', 'healthy'] },
+  { name: 'Cabbage', store: 'Go Fruits', price: 150, variant: { brand: 'Fresh', size: '1 head', unit: 'head' }, tags: ['vegetables', 'fresh produce', 'staple'] },
+  { name: 'Mushrooms', store: 'Go Fruits', price: 250, variant: { brand: 'Fresh Button', size: '250g', unit: 'punnet' }, tags: ['vegetables', 'fresh produce', 'cooking'] },
+  { name: 'Butternut', store: 'Go Fruits', price: 220, variant: { brand: 'Fresh', size: '1 piece', unit: 'piece' }, tags: ['vegetables', 'fresh produce', 'soup'] },
+  { name: 'Ginger', store: 'Go Fruits', price: 120, variant: { brand: 'Fresh', size: '250g', unit: 'pack' }, tags: ['vegetables', 'fresh produce', 'spice', 'cooking'] },
+  { name: 'Garlic', store: 'Go Fruits', price: 250, variant: { brand: 'Fresh', size: '250g', unit: 'pack' }, tags: ['vegetables', 'fresh produce', 'spice', 'cooking'] },
+
+  // Herbs
+  { name: 'Coriander (Dhania)', store: 'Go Fruits', price: 30, variant: { brand: 'Fresh', size: '1 bunch', unit: 'bunch' }, tags: ['herb', 'fresh produce', 'cooking', 'dhania'] },
+  { name: 'Parsley', store: 'Go Fruits', price: 50, variant: { brand: 'Fresh', size: '1 bunch', unit: 'bunch' }, tags: ['herb', 'fresh produce', 'cooking'] },
+  { name: 'Mint', store: 'Go Fruits', price: 50, variant: { brand: 'Fresh', size: '1 bunch', unit: 'bunch' }, tags: ['herb', 'fresh produce', 'cooking', 'drink'] },
+  { name: 'Rosemary', store: 'Go Fruits', price: 80, variant: { brand: 'Fresh', size: '1 bunch', unit: 'bunch' }, tags: ['herb', 'fresh produce', 'cooking'] },
+  { name: 'Basil', store: 'Go Fruits', price: 80, variant: { brand: 'Fresh', size: '1 bunch', unit: 'bunch' }, tags: ['herb', 'fresh produce', 'cooking', 'italian'] },
+
+  // Extras
+  { name: 'Honey', store: 'Go Fruits', price: 480, variant: { brand: 'Local Pure', size: '500g', unit: 'jar' }, tags: ['sweetener', 'natural', 'healthy'] },
+  { name: 'Dates', store: 'Go Fruits', price: 380, variant: { brand: 'Imported', size: '500g', unit: 'pack' }, tags: ['fruit', 'dried', 'snack', 'healthy'] },
+  { name: 'Eggs', store: 'Go Fruits', price: 600, variant: { brand: 'Free Range', size: '30 pack', unit: 'tray' }, tags: ['protein', 'breakfast', 'healthy'] },
 ];

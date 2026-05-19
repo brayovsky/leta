@@ -9,6 +9,11 @@ const orderSchema = new Schema({
   }],
   history: [{ role: String, content: String }],
   clearToken: { type: String, default: null },
+  location: {
+    name: { type: String },
+    coordinates: { type: [Number] },
+  },
+  stores: [{ type: Schema.Types.ObjectId, ref: 'Store' }],
 }, { timestamps: true });
 
 module.exports = model('Order', orderSchema);

@@ -29,14 +29,30 @@ router.post('/', (req, res) => {
 
   const to = message.from ?? message.from_user_id;
   const phoneNumber = message.from ?? null;
-  const text = message.text?.body;
+
+  let payload;
+  if (message.type === 'text') {
+    payload = { type: 'text', text: message.text?.body };
+  } else if (message.type === 'location') {
+    payload = {
+      type: 'location',
+      location: {
+        latitude: message.location?.latitude,
+        longitude: message.location?.longitude,
+        name: message.location?.name,
+        address: message.location?.address,
+      },
+    };
+  } else {
+    return res.status(200).end();
+  }
 
   console.log(`From: ${to}`);
-  console.log(`Message: ${text}`);
+  console.log(`Message: ${payload.type === 'text' ? payload.text : JSON.stringify(payload.location)}`);
 
   res.status(200).end();
 
-  handleMessage(to, phoneNumber, text).catch(console.error);
+  handleMessage(to, phoneNumber, payload).catch(console.error);
 });
 
 module.exports = router;
