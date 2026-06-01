@@ -21,12 +21,12 @@ module.exports = [
     name: 'Chandarana Foodplus Signature Mall',
     chain: 'Chandarana',
     address: 'Signature Mall, Mombasa Road, Mlolongo',
-    location: { type: 'Point', coordinates: [36.9352, -1.3766] },
+    location: { type: 'Point', coordinates: [36.9508102, -1.417803] },
   },
   {
     name: 'Go Fruits Signature Mall',
     chain: 'Go Fruits',
     address: 'Signature Mall, Mombasa Road, Mlolongo',
-    location: { type: 'Point', coordinates: [36.9352, -1.3766] },
+    location: { type: 'Point', coordinates: [36.9508102, -1.417803] },
   },
 ];

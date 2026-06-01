@@ -135,7 +135,7 @@ body {
 
 .composer textarea::placeholder { color: #8696a0; }
 
-.composer button {
+.composer > button {
   width: 42px;
   height: 42px;
   border-radius: 50%;
@@ -150,8 +150,8 @@ body {
   transition: background 0.15s;
 }
 
-.composer button:hover:not(:disabled) { background: #06cf9c; }
-.composer button:disabled { background: #374045; cursor: default; }
+.composer > button:hover:not(:disabled) { background: #06cf9c; }
+.composer > button:disabled { background: #374045; cursor: default; }
 
 /* Location button */
 .loc-wrap {

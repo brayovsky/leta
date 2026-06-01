@@ -8,8 +8,8 @@ const PRESET_LOCATIONS = [
   { label: 'Westlands (near Naivas)', name: 'Westlands', latitude: -1.2683, longitude: 36.8051 },
   { label: 'Lavington (near Quickmart)', name: 'Lavington', latitude: -1.2853, longitude: 36.7724 },
   { label: 'Two Rivers (near Carrefour)', name: 'Two Rivers', latitude: -1.2150, longitude: 36.8000 },
-  { label: 'Pridelands / Tamarind Meadows', name: 'Pridelands', latitude: -1.3820, longitude: 36.9400 },
-  { label: 'Signature Mall (Chandarana & Go Fruits)', name: 'Signature Mall', latitude: -1.3766, longitude: 36.9352 },
+  { label: 'Pridelands / Tamarind Meadows', name: 'Pridelands', latitude: -1.4137186, longitude: 36.9531371 },
+  { label: 'Signature Mall (Chandarana & Go Fruits)', name: 'Signature Mall', latitude: -1.417803, longitude: 36.9508102 },
   { label: 'Karen (out of service)', name: 'Karen', latitude: -1.3185, longitude: 36.7026 },
 ]
 

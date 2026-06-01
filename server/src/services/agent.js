@@ -23,7 +23,9 @@ Current order:
 
 Message: <their text>
 
-Only add an item once you are certain it is what the customer wants. If a search returns multiple options, ask a short clarifying question and wait for their answer before adding anything. Keep clarifying until you can pick the right one with confidence.
+Only add an item once you are certain it is what the customer wants. If the customer asks for several items at once, commit the ones you are sure about and, in the same response, ask a short clarifying question about any ambiguous ones. Keep clarifying until you can pick the right one with confidence.
+
+search_items only returns items stocked in the stores serving this customer's delivery location. If a search returns no results (an empty array, or a result with "available": false), the requested item is NOT available — tell the customer plainly (e.g. "Sorry, X isn't available at the stores near you") and offer to help with something else. Never invent items, prices, brands, or store names. Never assume an item exists just because it would be reasonable to stock.
 ${usePreferences ? '\nWhen a customer picks a specific variant after a clarifying question, save their preference so it is automatic next time.\n' : ''}
 For greetings, ask what they would like to shop for.
 For anything unrelated to shopping, reply only: "I can only help with your shopping list."
@@ -37,7 +39,7 @@ Respond ONLY with valid JSON (no text outside it):
 }
 
 CRITICAL: The "id" field must ALWAYS be copied verbatim from a search_items result. Never invent or guess an id.
-Leave message as "" when items were added without ambiguity.`;
+Every item in the "items" array will be committed to the order — only include items you are certain about. You may commit certain items AND ask a clarifying question about other items in the same response: put the certain items in "items" and the question in "message". An empty message is fine when no extra reply is needed; an empty items array is fine when the whole turn is a clarifying question.`;
 
 const TOOLS = [
   {
@@ -138,6 +140,8 @@ function filterByTokens(items, query) {
 }
 
 async function searchItems(query, userId, storeIds) {
+  if (typeof query !== 'string' || !query.trim()) return [];
+
   const storeFilter = { store: { $in: storeIds } };
 
   if (usePreferences && userId) {
@@ -197,28 +201,53 @@ async function runAgentLoop(messages, userId, storeIds, logger) {
       });
       const callLog = [];
       for (const call of choice.message.tool_calls) {
-        const args = JSON.parse(call.function.arguments);
+        let args = null;
         let result;
-        switch (call.function.name) {
-          case 'search_items':
-            result = await searchItems(args.query, userId, storeIds);
-            break;
-          case 'remove_item':
-            removedIds.push(args.itemId);
-            result = { removed: args.itemId };
-            break;
-          case 'update_item':
-            updatedItems.push({ itemId: args.itemId, quantity: args.quantity });
-            result = { updated: args.itemId, quantity: args.quantity };
-            break;
-          case 'replace_item':
-            removedIds.push(args.itemId);
-            result = await searchItems(args.query, userId, storeIds);
-            break;
-          case 'save_preference':
-            if (usePreferences) savedPreferences.push({ itemName: args.itemName.toLowerCase(), itemId: args.itemId });
-            result = { saved: true };
-            break;
+        try {
+          args = JSON.parse(call.function.arguments);
+          switch (call.function.name) {
+            case 'search_items': {
+              const found = await searchItems(args.query, userId, storeIds);
+              result = found.length === 0
+                ? { available: false, items: [], note: `No items matching "${args.query}" are stocked in the stores serving this customer's location.` }
+                : found;
+              break;
+            }
+            case 'remove_item':
+              if (!args.itemId) throw new Error('Missing itemId');
+              removedIds.push(args.itemId);
+              result = { removed: args.itemId };
+              break;
+            case 'update_item':
+              if (!args.itemId) throw new Error('Missing itemId');
+              if (typeof args.quantity !== 'number') throw new Error('quantity must be a number');
+              updatedItems.push({ itemId: args.itemId, quantity: args.quantity });
+              result = { updated: args.itemId, quantity: args.quantity };
+              break;
+            case 'replace_item': {
+              if (!args.itemId) throw new Error('Missing itemId');
+              const replacements = await searchItems(args.query, userId, storeIds);
+              if (replacements.length === 0) {
+                result = { available: false, items: [], note: `No replacement matching "${args.query}" is stocked in this customer's stores. The original item has NOT been removed.` };
+                break;
+              }
+              removedIds.push(args.itemId);
+              result = replacements;
+              break;
+            }
+            case 'save_preference':
+              if (usePreferences) {
+                if (!args.itemName || !args.itemId) throw new Error('itemName and itemId required');
+                savedPreferences.push({ itemName: args.itemName.toLowerCase(), itemId: args.itemId });
+              }
+              result = { saved: true };
+              break;
+            default:
+              result = { error: `Unknown tool: ${call.function.name}` };
+          }
+        } catch (err) {
+          console.error(`Tool ${call.function.name} failed:`, err);
+          result = { error: err.message || 'Tool call failed' };
         }
         callLog.push({ name: call.function.name, args, result });
         messages.push({ role: 'tool', tool_call_id: call.id, content: JSON.stringify(result) });
@@ -346,7 +375,7 @@ async function processMessage(to, phoneNumber, message) {
     if (existing) existing.quantity = quantity;
   }
 
-  for (const resolved of (reply ? [] : resolvedItems ?? [])) {
+  for (const resolved of resolvedItems ?? []) {
     if (!Types.ObjectId.isValid(resolved.id)) continue;
     const existing = order.items.find(i => i.item.toString() === resolved.id);
     if (existing) {
@@ -385,8 +414,17 @@ async function processMessage(to, phoneNumber, message) {
 }
 
 async function handleMessage(to, phoneNumber, message) {
-  const reply = await processMessage(to, phoneNumber, message);
-  await sendMessage(to, reply);
+  try {
+    const reply = await processMessage(to, phoneNumber, message);
+    await sendMessage(to, reply);
+  } catch (err) {
+    console.error('handleMessage failed:', err);
+    try {
+      await sendMessage(to, 'Sorry, something went wrong on our end. Please try that again in a moment.');
+    } catch (sendErr) {
+      console.error('Fallback sendMessage failed:', sendErr);
+    }
+  }
 }
 
 module.exports = { handleMessage, processMessage };
