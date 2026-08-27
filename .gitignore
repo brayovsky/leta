@@ -3,3 +3,5 @@ node_modules/
 server/.env
 server/logs/
 .claude/settings.local.json
+public/
+.firebase/

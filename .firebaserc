@@ -1,0 +1,15 @@
+{
+  "projects": {
+    "default": "leta-495908"
+  },
+  "targets": {
+    "leta-495908": {
+      "hosting": {
+        "default": [
+          "leta-495908"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}

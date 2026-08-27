@@ -1,0 +1,46 @@
+steps:
+  - id: Install
+    name: node:22
+    entrypoint: yarn
+    args: ['install', '--frozen-lockfile']
+
+  - id: Build Portal
+    name: node:22
+    entrypoint: yarn
+    args: ['workspace', '@leta/portal', 'build']
+
+  - id: Build Checkout
+    name: node:22
+    entrypoint: yarn
+    args: ['workspace', '@leta/checkout', 'build']
+
+  - id: Assemble Public Dir
+    name: node:22
+    entrypoint: bash
+    args:
+      - '-c'
+      - |
+        set -e
+        mkdir -p public/portal public/checkout
+        cp -r portal/dist/. public/portal/
+        cp -r checkout/dist/. public/checkout/
+
+  - id: Deploy Hosting
+    name: node:22
+    entrypoint: bash
+    args:
+      - '-c'
+      - |
+        set -e
+        npx firebase-tools deploy --only hosting --project $_FIREBASE_PROJECT_ID --non-interactive
+
+options:
+  substitutionOption: ALLOW_LOOSE
+  logging: CLOUD_LOGGING_ONLY
+
+substitutions:
+  _FIREBASE_PROJECT_ID: leta-495908
+
+tags:
+  - gcp-cloud-build-deploy-firebase-hosting
+  - leta-hosting
