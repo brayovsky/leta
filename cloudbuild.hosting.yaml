@@ -9,10 +9,10 @@ steps:
   #   entrypoint: yarn
   #   args: ['workspace', '@leta/portal', 'build']
 
-  - id: Build Checkout
-    name: node:22
-    entrypoint: yarn
-    args: ['workspace', '@leta/checkout', 'build']
+  # - id: Build Checkout
+  #   name: node:22
+  #   entrypoint: yarn
+  #   args: ['workspace', '@leta/checkout', 'build']
 
   - id: Assemble Public Dir
     name: node:22
@@ -21,8 +21,7 @@ steps:
       - '-c'
       - |
         set -e
-        mkdir -p public/checkout
-        cp -r checkout/dist/. public/checkout/
+        mkdir -p public
 
   - id: Deploy Hosting
     name: node:22

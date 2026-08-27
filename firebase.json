@@ -5,10 +5,6 @@
     "trailingSlash": false,
     "rewrites": [
       {
-        "source": "/checkout/**",
-        "destination": "/checkout/index.html"
-      },
-      {
         "source": "/**",
         "run": {
           "serviceId": "leta-site",

@@ -67,12 +67,12 @@ export default function Home() {
             </div>
           </div>
           <div className="float-pill pill-one">🛍️ <b>We shop</b> for you</div>
-          <div className="float-pill pill-two">📍 Sabaki delivery</div>
+          <div className="float-pill pill-two">📍 Local delivery</div>
         </div>
       </section>
 
       <section className="trust-strip">
-        <span>EVERYDAY SHOPPING</span><i>•</i><span>LOCAL DELIVERY</span><i>•</i><span>WHATSAPP FIRST</span><i>•</i><span>STARTING IN SABAKI</span>
+        <span>EVERYDAY SHOPPING</span><i>•</i><span>LOCAL DELIVERY</span><i>•</i><span>WHATSAPP FIRST</span><i>•</i><span>BUILT TO SCALE</span>
       </section>
 
       <section className="section how" id="how-it-works">
@@ -105,11 +105,11 @@ export default function Home() {
       <section className="section about" id="about">
         <div className="about-card">
           <div className="eyebrow light">Starting local. Building for everywhere.</div>
-          <h2>Sabaki is just<br /><em>the beginning.</em></h2>
+          <h2>Local shopping,<br /><em>built to scale.</em></h2>
           <p>
-            Leta is starting in Sabaki so we can learn how to make everyday shopping
-            faster, easier and more convenient. As we learn, we'll bring the service
-            to more communities.
+            Leta is built to make everyday shopping faster, easier and more
+            convenient — starting with the communities right around us. As we
+            learn, we're growing the service to reach more neighbourhoods.
           </p>
           <div className="location"><span>📍</span><div><strong>Currently serving</strong><b>Sabaki</b></div></div>
         </div>
