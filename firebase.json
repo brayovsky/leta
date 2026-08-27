@@ -5,17 +5,6 @@
     "trailingSlash": false,
     "rewrites": [
       {
-        "source": "/api/**",
-        "run": {
-          "serviceId": "leta-wa-hook",
-          "region": "europe-west1"
-        }
-      },
-      {
-        "source": "/portal/**",
-        "destination": "/portal/index.html"
-      },
-      {
         "source": "/checkout/**",
         "destination": "/checkout/index.html"
       },

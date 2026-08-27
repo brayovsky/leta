@@ -4,10 +4,10 @@ steps:
     entrypoint: yarn
     args: ['install', '--frozen-lockfile']
 
-  - id: Build Portal
-    name: node:22
-    entrypoint: yarn
-    args: ['workspace', '@leta/portal', 'build']
+  # - id: Build Portal
+  #   name: node:22
+  #   entrypoint: yarn
+  #   args: ['workspace', '@leta/portal', 'build']
 
   - id: Build Checkout
     name: node:22
@@ -21,8 +21,7 @@ steps:
       - '-c'
       - |
         set -e
-        mkdir -p public/portal public/checkout
-        cp -r portal/dist/. public/portal/
+        mkdir -p public/checkout
         cp -r checkout/dist/. public/checkout/
 
   - id: Deploy Hosting
