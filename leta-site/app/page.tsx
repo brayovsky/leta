@@ -17,7 +17,7 @@ export default function Home() {
     <main>
       <header className="nav">
         <a href="#" className="brand" aria-label="Leta home">
-          <span className="brand-mark">L</span>
+          <img src="/logo.png" alt="" className="brand-logo" />
           <span>leta</span>
         </a>
         <nav className="desktop-nav">
@@ -51,7 +51,7 @@ export default function Home() {
         <div className="hero-card-wrap" aria-hidden="true">
           <div className="hero-card">
             <div className="card-top">
-              <span className="tiny-logo">L</span>
+              <span className="tiny-logo"><img src="/logo.png" alt="" /></span>
               <span>YOUR REQUEST</span>
               <span className="status">●</span>
             </div>
@@ -131,7 +131,7 @@ export default function Home() {
       </section>
 
       <footer>
-        <a href="#" className="brand footer-brand"><span className="brand-mark">L</span><span>leta</span></a>
+        <a href="#" className="brand footer-brand"><img src="/logo.png" alt="" className="brand-logo" /><span>leta</span></a>
         <p>Shopping made easy.</p>
         <span>© 2026 Leta</span>
       </footer>
