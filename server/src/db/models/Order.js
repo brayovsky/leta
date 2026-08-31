@@ -9,6 +9,7 @@ const orderSchema = new Schema({
   }],
   history: [{ role: String, content: String }],
   clearToken: { type: String, default: null },
+  checkoutToken: { type: String, default: null },
   location: {
     name: { type: String },
     coordinates: { type: [Number] },

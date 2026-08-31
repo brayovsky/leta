@@ -1,7 +1,7 @@
 const crypto = require('crypto');
 const OpenAI = require('openai');
 const { Types } = require('mongoose');
-const { openaiApiKey, baseUrl, usePreferences, logLlm } = require('../config');
+const { openaiApiKey, baseUrl, checkoutUrl, usePreferences, logLlm } = require('../config');
 const LlmLogger = require('../utils/llmLogger');
 const User = require('../db/models/User');
 const Order = require('../db/models/Order');
@@ -399,13 +399,15 @@ async function processMessage(to, phoneNumber, message) {
   order.history.push({ role: 'user', content: text });
   order.history.push({ role: 'assistant', content: JSON.stringify({ items: resolvedItems, removedIds, updatedItems, message: reply }) });
   order.clearToken = crypto.randomBytes(24).toString('hex');
+  order.checkoutToken = crypto.randomBytes(24).toString('hex');
   await order.save();
 
   const refreshed = await Order.findById(order._id)
     .populate({ path: 'items.item', populate: { path: 'store' } });
   const orderText = formatOrder(refreshed.items.filter(i => i.item));
   const clearUrl = `${baseUrl}/clear/${order._id}?t=${order.clearToken}`;
-  const links = `Finish Shopping: https://leta.app/finish\nClear Order: ${clearUrl}`;
+  const checkoutLink = `${checkoutUrl}/?order=${order._id}&t=${order.checkoutToken}`;
+  const links = `Finish Shopping: ${checkoutLink}\nClear Order: ${clearUrl}`;
 
   const outText = [orderText, reply, links].filter(Boolean).join('\n\n');
   logger?.finalReply(reply || '(silent)');

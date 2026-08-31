@@ -1,13 +1,18 @@
 const express = require('express');
 const webhookRoutes = require('./routes/webhook');
 const orderRoutes = require('./routes/orders');
+const checkoutRoutes = require('./routes/checkout');
 const userRoutes = require('./routes/users');
 const devRoutes = require('./routes/dev');
 const authRoutes = require('./routes/auth');
 
 const app = express();
 
-const ALLOWED_ORIGINS = new Set(['http://localhost:5173', 'http://localhost:5174']);
+const ALLOWED_ORIGINS = new Set([
+  'http://localhost:5173',
+  'http://localhost:5174',
+  'http://localhost:5175',
+]);
 
 app.use((req, res, next) => {
   const origin = req.headers.origin;
@@ -27,6 +32,7 @@ app.use(express.json());
 app.use('/', webhookRoutes);
 app.use('/', authRoutes);
 app.use('/', orderRoutes);
+app.use('/', checkoutRoutes);
 app.use('/', userRoutes);
 app.use('/', devRoutes);
 
