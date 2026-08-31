@@ -7,9 +7,9 @@ if (!sessionSecret) {
   throw new Error('SESSION_SECRET must be set');
 }
 
-function sign(user) {
+function sign(user, role = 'portal') {
   return jwt.sign(
-    { email: user.email, name: user.name, picture: user.picture },
+    { email: user.email, name: user.name, picture: user.picture, role },
     sessionSecret,
     { expiresIn: sessionTtlSec }
   );

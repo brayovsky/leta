@@ -1,8 +1,38 @@
 const { Router } = require('express');
 const { verifyToken } = require('../config');
 const { handleMessage } = require('../services/agent');
+const { getConversationMode } = require('../services/settings');
+const User = require('../db/models/User');
+const Order = require('../db/models/Order');
 
 const router = Router();
+
+// When a human is handling conversations (see routes/console.js), incoming
+// messages are just recorded onto the order's history for the console inbox
+// to pick up — no auto-reply, no LLM call.
+async function recordIncomingMessage(to, phoneNumber, message) {
+  const user = await User.findOneAndUpdate(
+    { waId: to },
+    { waId: to, ...(phoneNumber && { phoneNumber }) },
+    { upsert: true, new: true }
+  );
+
+  let order = await Order.findOne({ user: user._id, status: 'active' });
+  if (!order) order = await Order.create({ user: user._id });
+
+  if (message.type === 'location') {
+    const { latitude, longitude, name, address } = message.location;
+    order.history.push({
+      role: 'user',
+      content: `[Shared location] ${name || address || ''}`.trim(),
+      meta: { type: 'location', latitude, longitude, name: name || address || 'Shared location' },
+    });
+  } else {
+    order.history.push({ role: 'user', content: message.text ?? '' });
+  }
+
+  await order.save();
+}
 
 router.get('/', (req, res) => {
   const { 'hub.mode': mode, 'hub.challenge': challenge, 'hub.verify_token': token } = req.query;
@@ -52,7 +82,11 @@ router.post('/', (req, res) => {
 
   res.status(200).end();
 
-  handleMessage(to, phoneNumber, payload).catch(console.error);
+  getConversationMode()
+    .then(mode => (mode === 'human'
+      ? recordIncomingMessage(to, phoneNumber, payload)
+      : handleMessage(to, phoneNumber, payload)))
+    .catch(console.error);
 });
 
 module.exports = router;

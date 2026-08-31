@@ -7,7 +7,7 @@ const orderSchema = new Schema({
     item: { type: Schema.Types.ObjectId, ref: 'Item' },
     quantity: { type: Number, default: 1 },
   }],
-  history: [{ role: String, content: String }],
+  history: [{ role: String, content: String, meta: Schema.Types.Mixed }],
   clearToken: { type: String, default: null },
   checkoutToken: { type: String, default: null },
   location: {

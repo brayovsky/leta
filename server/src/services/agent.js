@@ -429,4 +429,7 @@ async function handleMessage(to, phoneNumber, message) {
   }
 }
 
-module.exports = { handleMessage, processMessage };
+// searchItems/formatOrder are also reused by the human agent-console routes
+// (routes/console.js) so a human operator searches/renders the same catalog
+// and order summary the LLM agent would.
+module.exports = { handleMessage, processMessage, searchItems, formatOrder };

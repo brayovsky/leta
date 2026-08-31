@@ -11,6 +11,8 @@ module.exports = {
   googleClientId: process.env.GOOGLE_CLIENT_ID,
   allowedEmails: (process.env.ALLOWED_EMAILS || '')
     .split(',').map(s => s.trim().toLowerCase()).filter(Boolean),
+  allowedAgentEmails: (process.env.ALLOWED_AGENT_EMAILS || '')
+    .split(',').map(s => s.trim().toLowerCase()).filter(Boolean),
   sessionSecret: process.env.SESSION_SECRET,
   sessionTtlSec: 60 * 60 * 24 * 7,
   isProd: process.env.NODE_ENV === 'production',

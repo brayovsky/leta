@@ -5,6 +5,7 @@ const checkoutRoutes = require('./routes/checkout');
 const userRoutes = require('./routes/users');
 const devRoutes = require('./routes/dev');
 const authRoutes = require('./routes/auth');
+const consoleRoutes = require('./routes/console');
 
 const app = express();
 
@@ -12,6 +13,7 @@ const ALLOWED_ORIGINS = new Set([
   'http://localhost:5173',
   'http://localhost:5174',
   'http://localhost:5175',
+  'http://localhost:5176',
 ]);
 
 app.use((req, res, next) => {
@@ -35,5 +37,6 @@ app.use('/', orderRoutes);
 app.use('/', checkoutRoutes);
 app.use('/', userRoutes);
 app.use('/', devRoutes);
+app.use('/', consoleRoutes);
 
 module.exports = app;
