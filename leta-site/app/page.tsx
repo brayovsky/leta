@@ -15,6 +15,9 @@ const categories = [
 export default function Home() {
   return (
     <main>
+      <div className="promo-banner">
+        🎉 Free delivery in Sabaki and environs until September 30th!
+      </div>
       <header className="nav">
         <a href="#" className="brand" aria-label="Leta home">
           <img src="/logo.png" alt="" className="brand-logo" />
@@ -38,6 +41,9 @@ export default function Home() {
           <p className="hero-text">
             Tell Leta what you need. We'll shop it and deliver it to your door.
             No queues. No traffic. No hassle.
+          </p>
+          <p className="hero-text hero-promo">
+            🚚 Free delivery in Sabaki and environs until September 30th.
           </p>
           <div className="hero-actions">
             <a className="button primary" href={WHATSAPP_LINK} target="_blank" rel="noreferrer">
