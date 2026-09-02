@@ -9,6 +9,7 @@ const categories = [
   { icon: "🍼", title: "Baby essentials", text: "The things you need for little ones." },
   { icon: "🐾", title: "Pet supplies", text: "Food and everyday pet essentials." },
   { icon: "📦", title: "Everyday shopping", text: "Tell us what you need and we'll look for it." },
+  { icon: "🚚", title: "Parcel pickups & delivery", text: "We'll collect and drop off parcels for you." },
   { icon: "✨", title: "And more", text: "If it's available locally, ask Leta." }
 ];
 
