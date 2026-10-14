@@ -29,7 +29,8 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use(express.json());
+// Keep the raw body so the webhook can verify Meta's X-Hub-Signature-256.
+app.use(express.json({ verify: (req, _res, buf) => { req.rawBody = buf; } }));
 
 app.use('/', webhookRoutes);
 app.use('/', authRoutes);

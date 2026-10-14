@@ -1,12 +1,12 @@
 {
   "projects": {
-    "default": "leta-495908"
+    "default": "your-firebase-project-id"
   },
   "targets": {
-    "leta-495908": {
+    "your-firebase-project-id": {
       "hosting": {
         "default": [
-          "leta-495908"
+          "your-firebase-project-id"
         ]
       }
     }

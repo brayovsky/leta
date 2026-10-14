@@ -1,4 +1,4 @@
-const WHATSAPP_NUMBER = "254141225868";
+const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "";
 const WHATSAPP_LINK = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
   "Hi Leta! I'd like to request some shopping."
 )}`;

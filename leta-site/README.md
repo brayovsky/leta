@@ -5,22 +5,24 @@ A simple, responsive Next.js website for Leta's pilot.
 ## Requirements
 
 - Node.js 20.9+ recommended
-- npm
+- Yarn 1 (this is a workspace of the Leta monorepo)
 
 ## Run locally
 
+From the repo root:
+
 ```bash
-npm install
-npm run dev
+yarn install
+yarn dev:site
 ```
 
-Then open http://localhost:3000
+Then open http://localhost:3000. If the Leta server is already using port 3000, run `yarn dev:site -p 3001` instead.
 
 ## Build
 
 ```bash
-npm run build
-npm start
+yarn workspace @leta/leta-site build
+yarn workspace @leta/leta-site start
 ```
 
 ## Customize

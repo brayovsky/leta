@@ -1,11 +1,28 @@
+const crypto = require('crypto');
 const { Router } = require('express');
-const { verifyToken } = require('../config');
+const { verifyToken, appSecret, isProd } = require('../config');
 const { handleMessage } = require('../services/agent');
 const { getConversationMode } = require('../services/settings');
 const User = require('../db/models/User');
 const Order = require('../db/models/Order');
 
 const router = Router();
+
+if (!appSecret) {
+  if (isProd) throw new Error('WA_APP_SECRET must be set');
+  console.warn('WA_APP_SECRET not set: webhook signatures will not be verified (dev only)');
+}
+
+// Meta signs each webhook POST with the app secret (X-Hub-Signature-256).
+function hasValidSignature(req) {
+  if (!appSecret) return true;
+  const header = req.get('x-hub-signature-256') || '';
+  if (!req.rawBody) return false;
+  const expected = 'sha256=' + crypto.createHmac('sha256', appSecret).update(req.rawBody).digest('hex');
+  const a = Buffer.from(header);
+  const b = Buffer.from(expected);
+  return a.length === b.length && crypto.timingSafeEqual(a, b);
+}
 
 // When a human is handling conversations (see routes/console.js), incoming
 // messages are just recorded onto the order's history for the console inbox
@@ -46,6 +63,8 @@ router.get('/', (req, res) => {
 });
 
 router.post('/', (req, res) => {
+  if (!hasValidSignature(req)) return res.status(401).end();
+
   const timestamp = new Date().toISOString().replace('T', ' ').slice(0, 19);
   console.log(`\n\nWebhook received ${timestamp}\n`);
 
@@ -54,8 +73,6 @@ router.post('/', (req, res) => {
 
   const message = changes.value?.messages?.[0];
   if (!message) return res.status(200).end();
-
-  console.log(JSON.stringify(req.body, null, 2));
 
   const to = message.from ?? message.from_user_id;
   const phoneNumber = message.from ?? null;
@@ -77,8 +94,7 @@ router.post('/', (req, res) => {
     return res.status(200).end();
   }
 
-  console.log(`From: ${to}`);
-  console.log(`Message: ${payload.type === 'text' ? payload.text : JSON.stringify(payload.location)}`);
+  console.log(`Message type: ${payload.type}`);
 
   res.status(200).end();
 

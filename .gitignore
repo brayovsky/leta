@@ -5,3 +5,7 @@ server/logs/
 .claude/settings.local.json
 /public/
 .firebase/
+dist/
+.env.*
+!.env.example
+*.log

@@ -37,7 +37,7 @@ options:
   logging: CLOUD_LOGGING_ONLY
 
 substitutions:
-  _FIREBASE_PROJECT_ID: leta-495908
+  _FIREBASE_PROJECT_ID: $PROJECT_ID
 
 tags:
   - gcp-cloud-build-deploy-firebase-hosting
