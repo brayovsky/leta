@@ -17,7 +17,7 @@ Leta is a proof of concept for quick, local deliveries over WhatsApp. A customer
               ┌──────────────┬─────────────┼───────────────┐
               ▼              ▼             ▼               ▼
           checkout        portal     agent-console     dev-client
-       (customer pays) (admin orders) (human agents)  (local WhatsApp sim)
+       (customer pays) (admin orders) (human agents)  (local WhatsApp simulation)
 ```
 
 1. A customer messages the business number. Meta forwards the message to the server's webhook (`POST /`).
